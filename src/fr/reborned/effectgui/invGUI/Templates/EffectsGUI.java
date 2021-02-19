@@ -3,8 +3,11 @@ package fr.reborned.effectgui.invGUI.Templates;
 import fr.reborned.effectgui.Main;
 import fr.reborned.effectgui.Tools.FastInv;
 import fr.reborned.effectgui.Tools.Fichier;
+import fr.reborned.effectgui.Tools.ItemStacked;
 import fr.reborned.effectgui.invGUI.InvGUI;
 import org.bukkit.entity.Player;
+
+import java.util.Arrays;
 
 public class EffectsGUI extends InvGUI {
 
@@ -24,7 +27,10 @@ public class EffectsGUI extends InvGUI {
 
     @Override
     public void init() {
-        this.fastInv.setItem(fichier.getSlotID("iteminmenu"),null);
+        for (ItemStacked itemStacked: fichier.getItemStackMenuConf()) {
+            this.fastInv.setItem(itemStacked.getSlotID(),itemStacked.getItemStack());
+        }
+//TODO
     }
 
     @Override
