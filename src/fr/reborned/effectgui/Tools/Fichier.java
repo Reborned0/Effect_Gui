@@ -55,12 +55,15 @@ public class Fichier extends File {
     }
 
     private void remplissageFile() {
-        String key = "hotbar.item1.";
-        loadConfiguration().set(key+"name"," ");
-        loadConfiguration().set(key+"type"," ");
-        loadConfiguration().set(key+"lore"," ");
-        loadConfiguration().set(key+"enchantement"," ");
-        loadConfiguration().set(key+"slotID"," ");
+        String key ="";
+        for (EnumTools S : EnumTools.values()){
+            key = "hotbar."+S.getName()+".";
+            loadConfiguration().set(key+"name", S.getName());
+            loadConfiguration().set(key+"type"," ");
+            loadConfiguration().set(key+"lore"," ");
+            loadConfiguration().set(key+"enchantement"," ");
+            loadConfiguration().set(key+"slotID"," ");
+        }
         key = "menu.";
         loadConfiguration().set(key+"nblignes"," ");
         loadConfiguration().set(key+"title"," ");
@@ -161,6 +164,10 @@ public class Fichier extends File {
     }
     public int getSlotID(String key){
         return loadConfiguration().getConfigurationSection(key).getInt(".slotID");
+    }
+
+    public int getIntOfEffect(String key){
+        return loadConfiguration().getConfigurationSection(key).getInt(".amplifier");
     }
 }
 

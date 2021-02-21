@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Plugin_Effects">
+    <output-path>$PROJECT_DIR$/out/artifacts/Plugin_Effects</output-path>
+    <root id="archive" name="Plugin_Effects.jar">
+      <element id="module-output" name="Effect_Gui" />
+      <element id="file-copy" path="$PROJECT_DIR$/plugin.yml" />
+    </root>
+  </artifact>
+</component>

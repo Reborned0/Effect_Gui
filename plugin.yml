@@ -1,0 +1,8 @@
+name: Effect_Gui
+version: 2
+main: fr.reborned.effectgui.Main
+description: Le plugin du Lobby
+author: Reborned_
+commands:
+  Eg:
+    description: Active plugin
