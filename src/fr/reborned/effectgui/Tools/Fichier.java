@@ -153,10 +153,9 @@ public class Fichier extends File {
         String str =loadConfigurationConf().getConfigurationSection("Menu").getString("title");
         String ret="";
 
-        System.out.println(str);
         for (int i=0;i<str.length();i++){
             char c = str.charAt(i);
-            System.out.println(c);
+
             if (c=='&'){
                 char id= str.charAt(i+1);
                 ret+=ChatColor.getByChar(id);
@@ -278,8 +277,30 @@ public class Fichier extends File {
     }
 
     public String getLinkSocialNetwork(String key){
-        String s="";
-        if (loadConfigurationConf().getConfigurationSection(key).getString("lienReseau").equals(" ")){
+        String s=loadConfigurationConf().getConfigurationSection(key).getString("lienReseau");
+
+
+        String ret="";
+
+        for (int i=0;i<s.length();i++){
+            char c = s.charAt(i);
+
+            if (c=='&'){
+                char id= s.charAt(i+1);
+                ret+=ChatColor.getByChar(id);
+                i++;
+                i++;
+                try {
+                    c=s.charAt(i);
+                }catch (StringIndexOutOfBoundsException e){
+                    c=' ';
+                    e.printStackTrace();
+                }
+
+            }
+            ret += c;
+        }
+        if (s.equals(" ")){
             s="Link dead";
         }
         return s;
