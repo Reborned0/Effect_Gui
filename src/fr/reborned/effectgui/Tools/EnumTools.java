@@ -3,9 +3,14 @@ package fr.reborned.effectgui.Tools;
 import org.bukkit.permissions.Permission;
 
 public enum EnumTools {
-    SPEED("Fly away", "Speed Boost", ""),
-    JUMP("Fly away", "Jump Boost", ""),
-    FLY("Fly away","FLY","nitroutils.fly");
+    SPEED("Speed Boost", "SPEED", ""),
+    JUMP("Jump Boost", "JUMP", ""),
+    FLY("Fly Away","FLY","nitroutils.fly"),
+    DUMP("DUMP","DUMP",""),
+    FACEBOOK("Facebook","TCHAT",""),
+    YOUTUBE("Youtube", "TCHAT",""),
+    INSTAGRAM("Instagram","TCHAT", ""),
+    FORUM("Forum","TCHAT","");
 
     private String name;
     private String commande;

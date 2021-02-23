@@ -12,6 +12,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
 
 import javax.swing.*;
 
@@ -27,9 +28,11 @@ public class PListerner implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e){
-        if (fichier.isWorldOk(e.getPlayer())){
-         ajoutHotBar(e.getPlayer(), fichier.getItemHotbar(), fichier.getSlotID("hotbar.item1"));
-        }
+        safePlayer(e.getPlayer());
+        ajoutHotBar(e.getPlayer(), fichier.getItemHotbar(), fichier.getSlotID("Hotbarmenu.Item"));
+      /*  if (fichier.isWorldOk(e.getPlayer())){
+
+        }*/
     }
 
     @EventHandler
@@ -38,9 +41,10 @@ public class PListerner implements Listener {
         Action action = e.getAction();
         ItemStack itemStack = e.getItem();
 
+
         if (itemStack != null){
-            if (action.equals(Action.RIGHT_CLICK_AIR) || action.equals(Action.RIGHT_CLICK_BLOCK) && itemStack.getType().equals(Material.SUGAR)){
-                EffectsGUI effectsGUI = new EffectsGUI(player);
+            if ((action.equals(Action.RIGHT_CLICK_AIR) || action.equals(Action.RIGHT_CLICK_BLOCK)) && itemStack.getType().equals(Material.SUGAR)){
+                EffectsGUI effectsGUI = new EffectsGUI(player,fichier);
                 effectsGUI.openInv();
             }
         }
@@ -48,6 +52,11 @@ public class PListerner implements Listener {
 
     }
 
+    private void safePlayer(Player p){
+        for (PotionEffect potionEffect : p.getActivePotionEffects()){
+            p.removePotionEffect(potionEffect.getType());
+        }
+    }
 
     private void ajoutHotBar(Player Joueur, ItemStack itemStack, int slotID){
         Joueur.getInventory().setItem(slotID,itemStack);
