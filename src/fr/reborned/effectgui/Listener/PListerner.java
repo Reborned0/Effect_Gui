@@ -5,12 +5,17 @@ import fr.reborned.effectgui.Tools.Fichier;
 import fr.reborned.effectgui.invGUI.Templates.EffectsGUI;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerLevelChangeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 
@@ -43,19 +48,34 @@ public class PListerner implements Listener {
 
 
         if (itemStack != null){
-            if ((action.equals(Action.RIGHT_CLICK_AIR) || action.equals(Action.RIGHT_CLICK_BLOCK)) && itemStack.getType().equals(Material.SUGAR)){
+            if ((action.equals(Action.RIGHT_CLICK_AIR) || action.equals(Action.RIGHT_CLICK_BLOCK)) && itemStack.equals(fichier.getItemHotbar())){
                 EffectsGUI effectsGUI = new EffectsGUI(player,fichier);
                 effectsGUI.openInv();
             }
         }
-//TODO
 
+    }
+    @EventHandler
+    public void onFoodLevelChange(FoodLevelChangeEvent e){
+        e.setCancelled(fichier.getfoodLevelChangeConf());
+    }
+
+    @EventHandler
+    public void onFalling(EntityDamageEvent e){
+        e.setCancelled(fichier.getFallDamage());
+    }
+
+    @EventHandler
+    public void onDropEvent(PlayerDropItemEvent e){
+        e.setCancelled(fichier.getDropItems());
     }
 
     private void safePlayer(Player p){
         for (PotionEffect potionEffect : p.getActivePotionEffects()){
             p.removePotionEffect(potionEffect.getType());
         }
+        p.setFoodLevel(Integer.MAX_VALUE);
+        p.setHealth(20);
     }
 
     private void ajoutHotBar(Player Joueur, ItemStack itemStack, int slotID){

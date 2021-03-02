@@ -33,11 +33,9 @@ public class Fichier extends File {
         super(pathname);
         this.compteur=0;
     }
-
     public Fichier(String parent, String child) {
         super(parent, child);
     }
-
     public Fichier(File parent, String child) {
         super(parent, child);
         this.compteur=0;
@@ -78,17 +76,19 @@ public class Fichier extends File {
         YamlConfiguration config = loadConfigurationConf();
 
         for (EnumTools S : EnumTools.values()){
-            key = "Iteminmenu."+S.getName()+".";
+            key = "Iteminmenu."+S.getCommande()+".";
             config.set(key+"name", S.getName());
             config.set(key+"type"," ");
             config.set(key+"lore"," ");
             config.set(key+"itemFlags"," ");
             config.set(key+"enchantement"," ");
-            config.set(key+"URL"," ");
             config.set(key+"amplifier"," ");
             config.set(key+"slotID"," ");
             if (S.getCommande().equalsIgnoreCase("TCHAT")){
+                config.set(key+"URL"," ");
+                config.set(key+"messageReseau"," ");
                 config.set(key+"lienReseau"," ");
+                config.set(key+"messageHover"," ");
             }
         }
         key="Hotbarmenu.Item.";
@@ -101,11 +101,22 @@ public class Fichier extends File {
         config.set(key+"slotID"," ");
 
         key = "Menu.";
+        config.set(key+"deletedChar",'&');
         config.set(key+"nblignes"," ");
         config.set(key+"title"," ");
+
         key= "Location.";
         config.set(key+"world", Bukkit.getServer().getWorlds().get(0).getName());
 
+        key="Players.";
+        config.set(key+"foodLevelChange",false);
+        config.set(key+"featherFalling",false);
+        config.set(key+"deletedCharFirst", '[');
+        config.set(key+"deletedCharSecond", ']');
+        config.set(key+"messInsuffisantePerm", "Redirection vers la [Boutique]");
+        config.set(key+"messInsuffisantePermLien", "https://nitrocube.buycraft.net/");
+        config.set(key+"messInsuffisantePermHover", "");
+        config.set(key+"dropItems", false);
         saveConfig(config);
     }
 
@@ -146,32 +157,18 @@ public class Fichier extends File {
         return location;
     }
 
-    public int getLigneConf(){
-        return loadConfigurationConf().getConfigurationSection("Menu").getInt("nblignes");
+    public int getLigneConf(String key, String subkey){
+        return loadConfigurationConf().getConfigurationSection(key).getInt(subkey);
     }
-    public String getTitleConf(){
-        String str =loadConfigurationConf().getConfigurationSection("Menu").getString("title");
-        String ret="";
 
-        for (int i=0;i<str.length();i++){
-            char c = str.charAt(i);
+    public String getTitleConf(String key, String subkey){
+        String str =loadConfigurationConf().getConfigurationSection(key).getString(subkey);
 
-            if (c=='&'){
-                char id= str.charAt(i+1);
-                ret+=ChatColor.getByChar(id);
-                i++;
-                i++;
-                try {
-                    c=str.charAt(i);
-                }catch (StringIndexOutOfBoundsException e){
-                    c=' ';
-                    e.printStackTrace();
-                }
-
-            }
-                ret += c;
+        if (str.equals(" ")){
+            str=ChatColor.DARK_RED+"Pas de titre défini";
         }
-        return ret;
+        str = colorString(str);
+        return str;
     }
 
     public ItemStack getItemHotbar(){
@@ -197,11 +194,10 @@ public class Fichier extends File {
         return itemStack;
     }
 
-    public ArrayList<ItemStacked> getItemStackMenuConf(){
+    public ArrayList<ItemStacked> getItemStackMenuConf(String key){
         ItemStacked itemStacked =null;
         YamlConfiguration configuration = loadConfigurationConf();
         ArrayList<ItemStacked> stackeds = new ArrayList<>();
-        String key ="Iteminmenu.";
 
         for (String itemString : loadConfigurationConf().getConfigurationSection(key).getKeys(false)){
             if (configuration.getConfigurationSection(key).getString(itemString+".type") != null && !configuration.getConfigurationSection(key).getString(itemString+".type").equalsIgnoreCase(" ")){
@@ -255,6 +251,7 @@ public class Fichier extends File {
         }
         return itemMeta;
     }
+
     public int getSlotID(String key){
         int slot=Integer.parseInt(loadConfigurationConf().getConfigurationSection(key).getString("slotID"));
         if (slot <0) {
@@ -279,13 +276,54 @@ public class Fichier extends File {
     public String getLinkSocialNetwork(String key){
         String s=loadConfigurationConf().getConfigurationSection(key).getString("lienReseau");
 
+        s=colorString(s);
 
+        if (s.equals(" ")){
+            s="Link dead";
+        }
+        return s;
+    }
+
+    public boolean getfoodLevelChangeConf(){
+        return configBool("Players","foodLevelChange");
+    }
+
+    public boolean getFallDamage(){
+        return configBool("Players","featherFalling");
+    }
+
+    public boolean getDropItems(){
+        return configBool("Players","dropItems");
+    }
+
+    public String getmessInsufisantePerm(){
+        String str = loadConfigurationConf().getConfigurationSection("Players").getString("messInsuffisantePerm");
+        str = colorString(str);
+        return str;
+
+    }
+
+    public String getMessageHover(String key, String subkey){
+        String str = loadConfigurationConf().getConfigurationSection(key).getString(subkey);
+
+        str=colorString(str);
+
+        return str;
+    }
+
+    public String getMessage(String key, String subkey){
+        String str="";
+
+        return str;
+    }
+
+    private String colorString(String s){
         String ret="";
-
+        char fromConf= getHideChar();
         for (int i=0;i<s.length();i++){
             char c = s.charAt(i);
 
-            if (c=='&'){
+            if (c==fromConf){
                 char id= s.charAt(i+1);
                 ret+=ChatColor.getByChar(id);
                 i++;
@@ -300,10 +338,17 @@ public class Fichier extends File {
             }
             ret += c;
         }
-        if (s.equals(" ")){
-            s="Link dead";
+        return ret;
+    }
+
+    private char getHideChar(){
+        char ret =' ';
+        if (loadConfigurationConf().getConfigurationSection("Menu").getString("deletedChar").equals(" ")){
+            ret ='&';
+        }else {
+            ret = loadConfigurationConf().getConfigurationSection("Menu").getString("deletedChar").charAt(0);
         }
-        return s;
+        return ret;
     }
 
     private static ItemStack getSkull(String url) {
@@ -326,6 +371,21 @@ public class Fichier extends File {
         }
         head.setItemMeta(headMeta);
         return head;
+    }
+
+    private boolean configBool(String key, String subkey){
+        boolean ret=false;
+        try {
+            if (loadConfigurationConf().getConfigurationSection(key).getString(subkey).equals(" ")) {
+                ret = true;
+                System.out.println("Veuillez verifier la syntaxe de featherFalling");
+            } else {
+                ret = loadConfigurationConf().getConfigurationSection(key).getBoolean(subkey);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return ret;
     }
 }
 

@@ -3,18 +3,20 @@ package fr.reborned.effectgui.Tools;
 import org.bukkit.permissions.Permission;
 
 public enum EnumTools {
-    SPEED("Speed Boost", "SPEED", ""),
-    JUMP("Jump Boost", "JUMP", ""),
-    FLY("Fly Away","FLY","nitroutils.fly"),
-    DUMP("DUMP","DUMP",""),
-    FACEBOOK("Facebook","TCHAT",""),
-    YOUTUBE("Youtube", "TCHAT",""),
-    INSTAGRAM("Instagram","TCHAT", ""),
-    FORUM("Forum","TCHAT","");
+    SPEED("Speed", "SPEED", " "),
+    JUMP("Jump", "JUMP", " "),
+    FLY("Fly","FLY","nitroutils.fly"),
+    DUMP("Reset","DUMP"," "),
+    FACEBOOK("Facebook","FACEBOOK"," "),
+    YOUTUBE("Youtube", "YOUTUBE"," "),
+    INSTAGRAM("Instagram","INSTAGRAM", " "),
+    FORUM("Forum","FORUM"," "),
+    TWITTER("Twitter","TWITTER"," ");
 
     private String name;
     private String commande;
     private String permission;
+
     EnumTools( String name, String commande,String permission) {
         this.name=name;
         this.commande=commande;
