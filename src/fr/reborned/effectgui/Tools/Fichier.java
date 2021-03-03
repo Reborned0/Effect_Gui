@@ -2,7 +2,6 @@ package fr.reborned.effectgui.Tools;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
-import com.sun.xml.internal.messaging.saaj.util.CharWriter;
 import fr.reborned.effectgui.Main;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -22,7 +21,6 @@ import java.lang.reflect.Field;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 
 public class Fichier extends File {
@@ -84,7 +82,7 @@ public class Fichier extends File {
             config.set(key+"enchantement"," ");
             config.set(key+"amplifier"," ");
             config.set(key+"slotID"," ");
-            if (S.getCommande().equalsIgnoreCase("TCHAT")){
+            if (S.getType().equalsIgnoreCase("RESEAU")){
                 config.set(key+"URL"," ");
                 config.set(key+"messageReseau"," ");
                 config.set(key+"lienReseau"," ");
@@ -111,6 +109,8 @@ public class Fichier extends File {
         key="Players.";
         config.set(key+"foodLevelChange",false);
         config.set(key+"featherFalling",false);
+        config.set(key+"foodLevel"," ");
+        config.set(key+"healthLevel", 20);
         config.set(key+"deletedCharFirst", '[');
         config.set(key+"deletedCharSecond", ']');
         config.set(key+"messInsuffisantePerm", "Redirection vers la [Boutique]");
@@ -148,6 +148,25 @@ public class Fichier extends File {
         return ret;
     }
 
+    public int getFoodLevel(){
+        int ret = loadConfigurationConf().getConfigurationSection("Players").getInt("foodLevel");
+        if (ret<0){
+            ret=Integer.MAX_VALUE;
+            sendErrorToCMD("Players","foodLevel");
+            System.out.println("Mettre une valeur comprise entre 0 et "+ Integer.MAX_VALUE+ ". Valeur par défaut = MAX");
+        }
+        return ret;
+    }
+
+    public int getHealthLevel(){
+        int ret = loadConfigurationConf().getConfigurationSection("Players").getInt("healthLevel");
+        if (ret<0 || ret>20){
+            ret=20;
+            sendErrorToCMD("Players","healthLevel");
+            System.out.println("Mettre une valeur comprise entre 0 et 20, 20 par défaut");
+        }
+        return ret;
+    }
 
     public Location getWorldConf(){
         Location location = null;
@@ -165,6 +184,7 @@ public class Fichier extends File {
         String str =loadConfigurationConf().getConfigurationSection(key).getString(subkey);
 
         if (str.equals(" ")){
+            sendErrorToCMD(key,subkey);
             str=ChatColor.DARK_RED+"Pas de titre défini";
         }
         str = colorString(str);
@@ -182,6 +202,7 @@ public class Fichier extends File {
         }else {
             Material material = Material.getMaterial(config.getConfigurationSection(key).getString("type").toUpperCase());
             if (material ==null){
+                sendErrorToCMD(key,"type");
                 System.out.println("Materiel non compris !");
             }else {
                 itemStack = new ItemStack(material);
@@ -211,6 +232,7 @@ public class Fichier extends File {
                 else if(configuration.getConfigurationSection(key).getString(itemString+".type") != null) {
                     Material material = Material.getMaterial(configuration.getConfigurationSection(key).getString(itemString + ".type").toUpperCase());
                     if (material == null) {
+                        sendErrorToCMD(key+itemString,"type");
                         System.out.println("Materiel non compris ! (item glass par défaut)");
                         material = Material.GLASS;
                     }
@@ -255,6 +277,7 @@ public class Fichier extends File {
     public int getSlotID(String key){
         int slot=Integer.parseInt(loadConfigurationConf().getConfigurationSection(key).getString("slotID"));
         if (slot <0) {
+            sendErrorToCMD(key,"slotID");
             System.out.println(key+".slotID dans la config n'est pas précisé a été mi par défaut à "+this.compteur);
             slot=this.compteur;
             this.compteur++;
@@ -266,6 +289,7 @@ public class Fichier extends File {
 
         int effect = loadConfigurationConf().getConfigurationSection(key).getInt(".amplifier");
         if (effect <0){
+            sendErrorToCMD(key,"amplifier");
             System.out.println("L'amplier a été mis par défaut à 1");
             effect=1;
         }
@@ -279,6 +303,7 @@ public class Fichier extends File {
         s=colorString(s);
 
         if (s.equals(" ")){
+            sendErrorToCMD(key,"lienReseau");
             s="Link dead";
         }
         return s;
@@ -313,7 +338,7 @@ public class Fichier extends File {
 
     public String getMessage(String key, String subkey){
         String str="";
-
+//TODO à continuer
         return str;
     }
 
@@ -378,7 +403,8 @@ public class Fichier extends File {
         try {
             if (loadConfigurationConf().getConfigurationSection(key).getString(subkey).equals(" ")) {
                 ret = true;
-                System.out.println("Veuillez verifier la syntaxe de featherFalling");
+                sendErrorToCMD(key,subkey);
+                System.out.println("Veuillez verifier la syntaxe de"+subkey);
             } else {
                 ret = loadConfigurationConf().getConfigurationSection(key).getBoolean(subkey);
             }
@@ -386,6 +412,10 @@ public class Fichier extends File {
             e.printStackTrace();
         }
         return ret;
+    }
+
+    private void sendErrorToCMD(String key, String subkey){
+        System.out.println("Une erreur pour la configuration de "+key+"."+subkey);
     }
 }
 

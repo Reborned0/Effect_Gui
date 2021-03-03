@@ -1,26 +1,30 @@
 package fr.reborned.effectgui.Tools;
 
-import org.bukkit.permissions.Permission;
-
 public enum EnumTools {
-    SPEED("Speed", "SPEED", " "),
-    JUMP("Jump", "JUMP", " "),
-    FLY("Fly","FLY","nitroutils.fly"),
-    DUMP("Reset","DUMP"," "),
-    FACEBOOK("Facebook","FACEBOOK"," "),
-    YOUTUBE("Youtube", "YOUTUBE"," "),
-    INSTAGRAM("Instagram","INSTAGRAM", " "),
-    FORUM("Forum","FORUM"," "),
-    TWITTER("Twitter","TWITTER"," ");
+    SPEED("Speed", "SPEED", " ","POTION"),
+    JUMP("Jump", "JUMP", " ","POTION"),
+    FLY("Fly","FLY","nitroutils.fly","POTION"),
+    DUMP("Reset","DUMP"," ","POTION"),
+    FACEBOOK("Facebook","FACEBOOK"," ","RESEAU"),
+    YOUTUBE("Youtube", "YOUTUBE"," ","RESEAU"),
+    INSTAGRAM("Instagram","INSTAGRAM", " ","RESEAU"),
+    FORUM("Forum","FORUM"," ","RESEAU"),
+    TWITTER("Twitter","TWITTER"," ","RESEAU");
 
     private String name;
     private String commande;
     private String permission;
+    private String type;
 
-    EnumTools( String name, String commande,String permission) {
+    EnumTools( String name, String commande,String permission, String type) {
         this.name=name;
         this.commande=commande;
         this.permission=permission;
+        this.type=type;
+    }
+
+    public String getType() {
+        return type;
     }
 
     public String getName() {

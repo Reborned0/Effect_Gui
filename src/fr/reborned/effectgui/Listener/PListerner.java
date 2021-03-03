@@ -74,8 +74,8 @@ public class PListerner implements Listener {
         for (PotionEffect potionEffect : p.getActivePotionEffects()){
             p.removePotionEffect(potionEffect.getType());
         }
-        p.setFoodLevel(Integer.MAX_VALUE);
-        p.setHealth(20);
+        p.setFoodLevel(fichier.getFoodLevel());
+        p.setHealth(fichier.getHealthLevel());
     }
 
     private void ajoutHotBar(Player Joueur, ItemStack itemStack, int slotID){
