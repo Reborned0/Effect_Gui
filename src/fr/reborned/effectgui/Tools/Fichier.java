@@ -5,6 +5,7 @@ import com.mojang.authlib.properties.Property;
 import fr.reborned.effectgui.Main;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -22,6 +23,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 public class Fichier extends File {
     private Main main;
@@ -75,7 +77,7 @@ public class Fichier extends File {
 
         for (EnumTools S : EnumTools.values()){
             key = "ItemInMenu."+S.getCommande()+".";
-            config.set(key+"name", S.getName());
+            config.set(key+"name", "'"+S.getName()+"'");
             config.set(key+"type"," ");
             config.set(key+"lore"," ");
             config.set(key+"itemFlags"," ");
@@ -99,6 +101,11 @@ public class Fichier extends File {
         config.set(key+"slotID"," ");
 
         key = "Menu.";
+        config.set(key+"deletedChar",'&');
+        config.set(key+"nblignes"," ");
+        config.set(key+"title"," ");
+
+        key = "AmplifierMenu.";
         config.set(key+"deletedChar",'&');
         config.set(key+"nblignes"," ");
         config.set(key+"title"," ");
@@ -342,15 +349,24 @@ public class Fichier extends File {
         return configBool("Players","dropItems");
     }
 
-    public String getmessInsufisantePerm(){
-        String str="";
+    public Messages getmessInsufisantePerm(){
+        Messages messages = null;
+        String str;
         String key="Players";
         if (isSectionExist(key)) {
             str = loadConfigurationConf().getConfigurationSection(key).getString("messInsuffisantePerm");
-            str = colorString(str);
-        }
-        return str;
 
+            messages = custom(str);
+        }
+        return messages;
+
+    }
+    public String getURL(String key,String subkey){
+        String ret="";
+        if (isSectionExist(key)){
+            ret=loadConfigurationConf().getConfigurationSection(key).getString(subkey);
+        }
+        return ret;
     }
 
     public String getMessageHover(String key, String subkey){
@@ -382,41 +398,47 @@ public class Fichier extends File {
         return messages;
     }
 
-
     private Messages custom(String s){
         Messages messages =null;
         String key="Players";
         if (s.length()>0) {
             if (isSectionExist(key)) {
 
-                char del1 = loadConfigurationConf().getConfigurationSection(key).getString("deletedCharFirst").charAt(0);
-                char del2 = loadConfigurationConf().getConfigurationSection(key).getString("deletedCharSecond").charAt(0);
-                if (del1 == ' ') {
-                    del1 = '[';
+                String del1 = loadConfigurationConf().getConfigurationSection(key).getString("deletedCharFirst").substring(0,1);
+                String del2 = loadConfigurationConf().getConfigurationSection(key).getString("deletedCharSecond").substring(0,1);
+                if (del1.equals(" ")) {
+                    del1 = "[";
                 }
-                if (del2 == ' ') {
-                    del2 = ']';
+                if (del2.equals(" ")) {
+                    del2 = "]";
                 }
-                if (s.contains(String.valueOf(del1)) && s.contains(String.valueOf(del2))){
+                if (s.contains(del1) && s.contains(del2)){
+                    String s1,s2,s3;
+                    try {
+                        s1 = s.split(Pattern.quote(del1))[0];
+                    }catch (Exception e){
+                        s1="";
+                    }
+                    try {
+                        s2 = s.substring(s.indexOf(del1), s.indexOf(del2)+1);
+                    }catch (Exception e){
+                        s2="";
+                    }
+                    try {
+                        s3 = s.split(Pattern.quote(del2))[1];
+                    }catch (Exception e){
+                        s3="";
+                    }
 
 
-                    String s1 = s.split(String.valueOf(del1))[0];
-                    String s2 = s.substring(s.indexOf(del1), s.indexOf(del2));
-                    String s3 = s.split(String.valueOf(del2))[1];
-                    s3 = colorString(s3);
                     s1 = colorString(s1);
-                    s2 = colorString(s2);
+                    s2 = colorString(ChatColor.getLastColors(s1)+s2);
+                    s3 = colorString(ChatColor.getLastColors(s2)+s3);
                     messages = new Messages(s1, s2, s3);
                 }else {
                     s=colorString(s);
                     messages = new Messages(s,"","");
                 }
-
-
-
-
-
-
 
             }
         }else
@@ -425,7 +447,6 @@ public class Fichier extends File {
         }
         return messages;
     }
-
 
     private String colorString(String s){
         String ret="";

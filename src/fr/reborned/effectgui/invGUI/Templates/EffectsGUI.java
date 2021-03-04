@@ -3,18 +3,19 @@ package fr.reborned.effectgui.invGUI.Templates;
 import fr.reborned.effectgui.Main;
 import fr.reborned.effectgui.Tools.*;
 import fr.reborned.effectgui.invGUI.InvGUI;
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.*;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -25,7 +26,6 @@ public class EffectsGUI extends InvGUI {
     private FastInv fastInv;
     private int Ligne;
     private Fichier fichier;
-    private Main main;
 
     public EffectsGUI(Player player, Fichier fichier){
         this.player=player;
@@ -39,11 +39,11 @@ public class EffectsGUI extends InvGUI {
     public void init() {
         for (ItemStacked itemStacked: fichier.getItemStackMenuConf("ItemInMenu")) {
             for (PotionEffect potionEffect : this.player.getActivePotionEffects()){
-                if (potionEffect.getType().getName().toLowerCase().contains(itemStacked.getItemStack().getItemMeta().getDisplayName().toLowerCase())){
+                if (potionEffect.getType().getName().toLowerCase().contains(ChatColor.stripColor(itemStacked.getItemStack().getItemMeta().getDisplayName().toLowerCase()))){
                     enchantItemInventory(itemStacked);
                 }
             }
-            if (this.player.getAllowFlight() && itemStacked.getItemStack().getItemMeta().getDisplayName().toUpperCase().contains(EnumTools.FLY.getCommande())){
+            if (this.player.getAllowFlight() && ChatColor.stripColor(itemStacked.getItemStack().getItemMeta().getDisplayName().toUpperCase()).contains(EnumTools.FLY.getCommande())){
                 enchantItemInventory(itemStacked);
             }
             this.fastInv.setItem(itemStacked.getSlotID(), itemStacked.getItemStack());
@@ -57,10 +57,12 @@ public class EffectsGUI extends InvGUI {
                 if (!unEvent.getCurrentItem().getType().isTransparent()) {
 
                     Optional<EnumTools> optional = Arrays.stream(EnumTools.values()).filter((en) -> {
-                        return unEvent.getCurrentItem().getItemMeta().getDisplayName().equals(en.getName());
+                        return ChatColor.stripColor(unEvent.getCurrentItem().getItemMeta().getDisplayName()).equalsIgnoreCase(en.getCommande());
                     }).findAny();
                     optional.ifPresent((c) -> {
                         if (PotionEffectType.getByName(c.getCommande().toUpperCase()) != null) {
+
+                            AmplierGUI amplierGUI = new AmplierGUI(this.player, itemUniqueWithName(unEvent.getCurrentItem()),this.fichier);
                             if (this.player.hasPotionEffect(PotionEffectType.getByName(c.getCommande().toUpperCase()))) {
                                 try {
                                     for (PotionEffect potionEffect : this.player.getActivePotionEffects()) {
@@ -74,29 +76,23 @@ public class EffectsGUI extends InvGUI {
                                 }
 
                             } else if (!this.player.hasPotionEffect(PotionEffectType.getByName(c.getCommande().toUpperCase()))) {
-                                try {
-                                    this.player.addPotionEffect(new PotionEffect(PotionEffectType.getByName(c.getCommande().toUpperCase()), Integer.MAX_VALUE, fichier.getIntOfEffect("ItemInMenu." + c.getName()), true, true));
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            }else
-                            {
-                                this.player.sendMessage(ChatColor.RED+"Vous n'avez pas les permissions suffisantes");
+                                amplierGUI.openInv();
+                                return;
                             }
-                        }else {
-                            if (c.getCommande().equalsIgnoreCase(unEvent.getCurrentItem().getItemMeta().getDisplayName())) {
 
-                                if (unEvent.getCurrentItem().getType().equals(Material.SKULL_ITEM)){
+                            if (c.getCommande().equalsIgnoreCase(ChatColor.stripColor(unEvent.getCurrentItem().getItemMeta().getDisplayName()))) {
+
+                                if (unEvent.getCurrentItem().getType().equals(Material.SKULL_ITEM)) {
                                     String name = unEvent.getCurrentItem().getItemMeta().getDisplayName();
-                                    Messages messages = this.fichier.getMessage("ItemInMenu",c.getCommande());
+                                    Messages messages = this.fichier.getMessage("ItemInMenu", c.getCommande());
 
 
                                     TextComponent msgBefore = new TextComponent(messages.getBeforeMessage());
                                     TextComponent msgHover = new TextComponent(messages.getHoverMessage());
                                     TextComponent msgAfter = new TextComponent(messages.getAfterMessage());
 
-                                    msgHover.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, this.fichier.getLinkSocialNetwork("ItemInMenu."+ c.getCommande())));
-                                    msgHover.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(this.fichier.getMessageHover("ItemInMenu." + c.getCommande(),"messageHover")).create()));
+                                    msgHover.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, this.fichier.getLinkSocialNetwork("ItemInMenu." + c.getCommande())));
+                                    msgHover.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(this.fichier.getMessageHover("ItemInMenu." + c.getCommande(), "messageHover")).create()));
 
                                     msgBefore.addExtra(msgHover);
                                     msgBefore.addExtra(msgAfter);
@@ -104,9 +100,47 @@ public class EffectsGUI extends InvGUI {
                                     this.player.spigot().sendMessage(msgBefore);
 
                                 }
+                            }
+                            else{
+                                this.player.sendMessage(ChatColor.RED+"Vous n'avez pas les permissions suffisantes");
+                            }
+                        }else {
 
 
-                                if (unEvent.getCurrentItem().getItemMeta().getDisplayName().contains("SPEED") || unEvent.getCurrentItem().getItemMeta().getDisplayName().contains("JUMP") || unEvent.getCurrentItem().getItemMeta().getDisplayName().contains("DUMP")) {
+                            if (c.getCommande().equalsIgnoreCase(ChatColor.stripColor(unEvent.getCurrentItem().getItemMeta().getDisplayName()))) {
+
+                                if (unEvent.getCurrentItem().getType().equals(Material.SKULL_ITEM)){
+                                    String name = unEvent.getCurrentItem().getItemMeta().getDisplayName();
+
+                                    Messages messages = this.fichier.getMessage("ItemInMenu",c.getCommande());
+
+                                    if (messages.getBeforeMessage().length()>0) {
+                                        TextComponent msgBefore = new TextComponent(messages.getBeforeMessage());
+                                        TextComponent msgAfter = new TextComponent(messages.getAfterMessage());
+                                        if (!messages.getHoverMessage().equals("")) {
+                                            TextComponent msgHover = new TextComponent(messages.getHoverMessage());
+                                            msgHover.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, this.fichier.getLinkSocialNetwork("ItemInMenu." + c.getCommande())));
+                                            String hovered =this.fichier.getMessageHover("ItemInMenu." + c.getCommande(),"messageHover");
+                                            if (hovered.equals("")) {
+                                                msgHover.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(hovered).create()));
+                                            }
+                                            msgBefore.addExtra(msgHover);
+                                        } else {
+                                            messages.setHoverMessage(this.fichier.getLinkSocialNetwork("ItemInMenu." + c.getCommande()));
+                                            TextComponent msgHover = new TextComponent(messages.getHoverMessage());
+                                            msgBefore.addExtra(msgHover);
+                                        }
+                                        msgBefore.addExtra(msgAfter);
+
+                                        this.player.spigot().sendMessage(msgBefore);
+                                    }else {
+                                        this.player.sendMessage(ChatColor.RED +""+ ChatColor.BOLD+"Link Dead");
+                                    }
+
+                                }
+
+
+                                if (ChatColor.stripColor(unEvent.getCurrentItem().getItemMeta().getDisplayName()).toUpperCase().equals(EnumTools.DUMP.getCommande())) {
 
                                     try {
                                         for (PotionEffect potionEffect : this.player.getActivePotionEffects()) {
@@ -119,12 +153,23 @@ public class EffectsGUI extends InvGUI {
                                         e.printStackTrace();
                                     }
                                 }
-                                if (unEvent.getCurrentItem().getItemMeta().getDisplayName().equalsIgnoreCase(EnumTools.FLY.getName()) && this.player.hasPermission(EnumTools.FLY.getPermission())){
+                                if (ChatColor.stripColor(unEvent.getCurrentItem().getItemMeta().getDisplayName()).equalsIgnoreCase(EnumTools.FLY.getName()) && this.player.hasPermission(EnumTools.FLY.getPermission())){
                                     this.player.setAllowFlight(!this.player.getAllowFlight());
-                                }else if (unEvent.getCurrentItem().getItemMeta().getDisplayName().equalsIgnoreCase(EnumTools.FLY.getName()) && !this.player.hasPermission(EnumTools.FLY.getPermission())){
-                                    this.player.sendMessage(fichier.getmessInsufisantePerm());
-                                }
+                                }else if (ChatColor.stripColor(unEvent.getCurrentItem().getItemMeta().getDisplayName()).equalsIgnoreCase(EnumTools.FLY.getName()) && !this.player.hasPermission(EnumTools.FLY.getPermission())){
+                                    Messages messages = this.fichier.getmessInsufisantePerm();
 
+                                    TextComponent msgBefore = new TextComponent(messages.getBeforeMessage());
+                                    TextComponent msgHover = new TextComponent(messages.getHoverMessage());
+                                    TextComponent msgAfter = new TextComponent(messages.getAfterMessage());
+
+                                    msgHover.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, this.fichier.getURL("Players","messInsuffisantePermLien")));
+                                    msgHover.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(this.fichier.getMessageHover("Players","messInsuffisantePermHover")).create()));
+
+                                    msgBefore.addExtra(msgHover);
+                                    msgBefore.addExtra(msgAfter);
+
+                                    this.player.spigot().sendMessage(msgBefore);
+                                }
 
                             }
                         }
@@ -135,6 +180,14 @@ public class EffectsGUI extends InvGUI {
                 }
             }
         });
+    }
+
+    private ItemStack itemUniqueWithName(ItemStack itemStack){
+        ItemStack itemStack1 = new ItemStack(itemStack.getType());
+        ItemMeta itemMeta = itemStack1.getItemMeta();
+        itemMeta.setDisplayName(itemStack.getItemMeta().getDisplayName());
+        itemStack1.setItemMeta(itemMeta);
+        return itemStack1;
     }
 
     @Override

@@ -4,7 +4,7 @@ public enum EnumTools {
     SPEED("Speed", "SPEED", " ","POTION"),
     JUMP("Jump", "JUMP", " ","POTION"),
     FLY("Fly","FLY","nitroutils.fly","POTION"),
-    DUMP("Reset","DUMP"," ","POTION"),
+    DUMP("Reset","RESET"," ","POTION"),
     FACEBOOK("Facebook","FACEBOOK"," ","RESEAU"),
     YOUTUBE("Youtube", "YOUTUBE"," ","RESEAU"),
     INSTAGRAM("Instagram","INSTAGRAM", " ","RESEAU"),
@@ -16,7 +16,7 @@ public enum EnumTools {
     private String permission;
     private String type;
 
-    EnumTools( String name, String commande,String permission, String type) {
+    EnumTools( String name, String commande,String permission, String type ) {
         this.name=name;
         this.commande=commande;
         this.permission=permission;
