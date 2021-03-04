@@ -55,7 +55,7 @@ public class Fichier extends File {
 
     public void CreationFichier(){
         try {
-            super.getParentFile().mkdirs();
+            if (super.getParentFile().mkdirs())
             if (super.createNewFile()) {
                 System.out.println("Fichier config vient d'être créer");
                 if (this.fichierVide(getAbsoluteFile())) {
@@ -74,7 +74,7 @@ public class Fichier extends File {
         YamlConfiguration config = loadConfigurationConf();
 
         for (EnumTools S : EnumTools.values()){
-            key = "Iteminmenu."+S.getCommande()+".";
+            key = "ItemInMenu."+S.getCommande()+".";
             config.set(key+"name", S.getName());
             config.set(key+"type"," ");
             config.set(key+"lore"," ");
@@ -109,7 +109,7 @@ public class Fichier extends File {
         key="Players.";
         config.set(key+"foodLevelChange",false);
         config.set(key+"featherFalling",false);
-        config.set(key+"foodLevel"," ");
+        config.set(key+"foodLevel", 20);
         config.set(key+"healthLevel", 20);
         config.set(key+"deletedCharFirst", '[');
         config.set(key+"deletedCharSecond", ']');
@@ -149,21 +149,29 @@ public class Fichier extends File {
     }
 
     public int getFoodLevel(){
-        int ret = loadConfigurationConf().getConfigurationSection("Players").getInt("foodLevel");
-        if (ret<0){
-            ret=Integer.MAX_VALUE;
-            sendErrorToCMD("Players","foodLevel");
-            System.out.println("Mettre une valeur comprise entre 0 et "+ Integer.MAX_VALUE+ ". Valeur par défaut = MAX");
+        String key="Players";
+        int ret=0;
+        if (isSectionExist(key)) {
+            ret = loadConfigurationConf().getConfigurationSection(key).getInt("foodLevel");
+            if (ret < 0) {
+                ret = Integer.MAX_VALUE;
+                sendErrorToCMD(key, "foodLevel");
+                System.out.println("Mettre une valeur comprise entre 0 et " + Integer.MAX_VALUE + ". Valeur par défaut = MAX");
+            }
         }
         return ret;
     }
 
     public int getHealthLevel(){
-        int ret = loadConfigurationConf().getConfigurationSection("Players").getInt("healthLevel");
-        if (ret<0 || ret>20){
-            ret=20;
-            sendErrorToCMD("Players","healthLevel");
-            System.out.println("Mettre une valeur comprise entre 0 et 20, 20 par défaut");
+        String key="Players";
+        int ret=0;
+        if (isSectionExist(key)) {
+            ret = loadConfigurationConf().getConfigurationSection("Players").getInt("healthLevel");
+            if (ret < 0 || ret > 20) {
+                ret = 20;
+                sendErrorToCMD("Players", "healthLevel");
+                System.out.println("Mettre une valeur comprise entre 0 et 20, 20 par défaut");
+            }
         }
         return ret;
     }
@@ -177,30 +185,36 @@ public class Fichier extends File {
     }
 
     public int getLigneConf(String key, String subkey){
-        return loadConfigurationConf().getConfigurationSection(key).getInt(subkey);
+        int ligne =0;
+        if (isSectionExist(key)){
+            ligne=loadConfigurationConf().getConfigurationSection(key).getInt(subkey);
+            if (ligne <0){
+                ligne=1;
+            }
+        }
+        return ligne;
     }
 
     public String getTitleConf(String key, String subkey){
-        String str =loadConfigurationConf().getConfigurationSection(key).getString(subkey);
+        String str ="";
+        if (isSectionExist(key)) {
+            str = loadConfigurationConf().getConfigurationSection(key).getString(subkey);
 
-        if (str.equals(" ")){
-            sendErrorToCMD(key,subkey);
-            str=ChatColor.DARK_RED+"Pas de titre défini";
+            if (str.equals(" ")) {
+                sendErrorToCMD(key, subkey);
+                str = ChatColor.DARK_RED + "Pas de titre défini";
+            }
+            str = colorString(str);
         }
-        str = colorString(str);
         return str;
     }
 
     public ItemStack getItemHotbar(){
         ItemStack itemStack = null;
         String key = "Hotbarmenu.Item";
-        YamlConfiguration config = loadConfigurationConf();
-        ConfigurationSection configurationSection = config.getConfigurationSection(key);
 
-        if (configurationSection == null){
-            System.out.println("Section does not exist !");
-        }else {
-            Material material = Material.getMaterial(config.getConfigurationSection(key).getString("type").toUpperCase());
+        if (isSectionExist(key)){
+            Material material = Material.getMaterial(loadConfigurationConf().getConfigurationSection(key).getString("type").toUpperCase());
             if (material ==null){
                 sendErrorToCMD(key,"type");
                 System.out.println("Materiel non compris !");
@@ -211,7 +225,6 @@ public class Fichier extends File {
             }
         }
 
-
         return itemStack;
     }
 
@@ -219,92 +232,100 @@ public class Fichier extends File {
         ItemStacked itemStacked =null;
         YamlConfiguration configuration = loadConfigurationConf();
         ArrayList<ItemStacked> stackeds = new ArrayList<>();
+        if (isSectionExist(key)) {
+            for (String itemString : loadConfigurationConf().getConfigurationSection(key).getKeys(false)){
+                if (configuration.getConfigurationSection(key).getString(itemString + ".type") != null && !configuration.getConfigurationSection(key).getString(itemString + ".type").equalsIgnoreCase(" ")) {
+                    if (Arrays.stream(EnumTools.values()).anyMatch(enumTools -> enumTools.getCommande().equalsIgnoreCase(configuration.getConfigurationSection(key).getString(itemString + ".type"))) && !configuration.getConfigurationSection(key).getString(itemString + ".type").equals(" ")) {
 
-        for (String itemString : loadConfigurationConf().getConfigurationSection(key).getKeys(false)){
-            if (configuration.getConfigurationSection(key).getString(itemString+".type") != null && !configuration.getConfigurationSection(key).getString(itemString+".type").equalsIgnoreCase(" ")){
-                if (Arrays.stream(EnumTools.values()).anyMatch(enumTools -> enumTools.getName().contains(configuration.getConfigurationSection(key).getString(itemString+".type"))) && !configuration.getConfigurationSection(key).getString(itemString+".type").equals(" ")){
+                        ItemStack itemStack = new ItemStack(getSkull(configuration.getConfigurationSection(key).getString(itemString + ".URL")));
 
-                    ItemStack itemStack = new ItemStack(getSkull(configuration.getConfigurationSection(key).getString(itemString+".URL")));
-
-                    itemStack.setItemMeta(getItemMetaCongif(itemStack, key + itemString));
-                    stackeds.add(new ItemStacked(itemStack,getSlotID(key+itemString)));
-                }
-                else if(configuration.getConfigurationSection(key).getString(itemString+".type") != null) {
-                    Material material = Material.getMaterial(configuration.getConfigurationSection(key).getString(itemString + ".type").toUpperCase());
-                    if (material == null) {
-                        sendErrorToCMD(key+itemString,"type");
-                        System.out.println("Materiel non compris ! (item glass par défaut)");
-                        material = Material.GLASS;
+                        itemStack.setItemMeta(getItemMetaCongif(itemStack, key+"." + itemString));
+                        stackeds.add(new ItemStacked(itemStack, getSlotID(key+"." + itemString)));
+                    } else if (configuration.getConfigurationSection(key).getString(itemString + ".type") != null) {
+                        Material material = Material.getMaterial(configuration.getConfigurationSection(key).getString(itemString + ".type").toUpperCase());
+                        if (material == null) {
+                            sendErrorToCMD(key+"." + itemString, "type");
+                            System.out.println("Materiel non compris ! (item glass par défaut)");
+                            material = Material.GLASS;
+                        }
+                        ItemStack itemStack = new ItemStack(material);
+                        itemStack.setItemMeta(getItemMetaCongif(itemStack, key+"." + itemString));
+                        itemStacked = new ItemStacked(itemStack, getSlotID(key+"." + itemString));
+                        stackeds.add(itemStacked);
                     }
-                    ItemStack itemStack = new ItemStack(material);
-
-                    itemStack.setItemMeta(getItemMetaCongif(itemStack, key + itemString));
-                    itemStacked = new ItemStacked(itemStack, getSlotID(key + itemString));
-                    stackeds.add(itemStacked);
                 }
             }
         }
-
         return stackeds;
     }
 
     public ItemMeta getItemMetaCongif(ItemStack item,String key){
         ItemMeta itemMeta= item.getItemMeta();
-        ConfigurationSection section = loadConfigurationConf().getConfigurationSection(key);
+        if (isSectionExist(key)) {
+            ConfigurationSection section = loadConfigurationConf().getConfigurationSection(key);
 
-        if (section.getString(".name") != null && !section.getString(".name").equalsIgnoreCase(" ")){
-            itemMeta.setDisplayName(section.getString(".name"));
-        }
-        if (section.getString(".enchantement") != null && !section.getString(".enchantement").equals(" ")){
-            for (String s : section.getStringList(".enchantement")) {
-                String enchName = s.split(":")[0];
-                Integer enchLevel = Integer.valueOf(s.split(":")[1]);
-                boolean enchBool = Boolean.parseBoolean(s.split(":")[2]);
-                itemMeta.addEnchant(Enchantment.getByName(enchName.toUpperCase()), enchLevel, true);
+            if (section.getString(".name") != null && !section.getString(".name").equalsIgnoreCase(" ")) {
+                itemMeta.setDisplayName(colorString(section.getString(".name")));
             }
-        }
-        if (section.getString(".lore") != null && !section.getString(".lore").equals(" ")){
-            itemMeta.setLore(section.getStringList(".lore"));
-        }
-        if (section.getString(".itemFlags") != null && !section.getString(".itemFlags").equals(" ")){
-            for (String s : section.getStringList(".itemFlags")){
-                itemMeta.addItemFlags(ItemFlag.valueOf(s));
+            if (section.getString(".enchantement") != null && !section.getString(".enchantement").equals(" ")) {
+                for (String s : section.getStringList(".enchantement")) {
+                    String enchName = s.split(":")[0];
+                    Integer enchLevel = Integer.valueOf(s.split(":")[1]);
+                    boolean enchBool = Boolean.parseBoolean(s.split(":")[2]);
+                    itemMeta.addEnchant(Enchantment.getByName(enchName.toUpperCase()), enchLevel, true);
+                }
+            }
+            if (section.getString(".lore") != null && !section.getString(".lore").equals(" ")) {
+                itemMeta.setLore(section.getStringList(".lore"));
+            }
+            if (section.getString(".itemFlags") != null && !section.getString(".itemFlags").equals(" ")) {
+                for (String s : section.getStringList(".itemFlags")) {
+                    itemMeta.addItemFlags(ItemFlag.valueOf(s));
+                }
             }
         }
         return itemMeta;
     }
 
     public int getSlotID(String key){
-        int slot=Integer.parseInt(loadConfigurationConf().getConfigurationSection(key).getString("slotID"));
-        if (slot <0) {
-            sendErrorToCMD(key,"slotID");
-            System.out.println(key+".slotID dans la config n'est pas précisé a été mi par défaut à "+this.compteur);
-            slot=this.compteur;
-            this.compteur++;
+        int slot =0;
+        if (isSectionExist(key)) {
+            try {
+                slot = Integer.parseInt(loadConfigurationConf().getConfigurationSection(key).getString("slotID"));
+            }catch (Exception e){
+                sendErrorToCMD(key, "slotID");
+                System.out.println(key + ".slotID dans la config n'est pas précisé a été mi par défaut à " + this.compteur);
+                slot = this.compteur;
+                this.compteur++;
+            }
         }
         return slot;
     }
 
     public int getIntOfEffect(String key){
-
-        int effect = loadConfigurationConf().getConfigurationSection(key).getInt(".amplifier");
-        if (effect <0){
-            sendErrorToCMD(key,"amplifier");
-            System.out.println("L'amplier a été mis par défaut à 1");
-            effect=1;
+        int effect=0;
+        if (isSectionExist(key)) {
+            effect = loadConfigurationConf().getConfigurationSection(key).getInt(".amplifier");
+            if (effect < 0) {
+                sendErrorToCMD(key, "amplifier");
+                System.out.println("L'amplier a été mis par défaut à 1");
+                effect = 1;
+            }
         }
-
         return effect;
     }
 
     public String getLinkSocialNetwork(String key){
-        String s=loadConfigurationConf().getConfigurationSection(key).getString("lienReseau");
+        String s="";
+        if (isSectionExist(key)) {
+            s = loadConfigurationConf().getConfigurationSection(key).getString("lienReseau");
 
-        s=colorString(s);
-
-        if (s.equals(" ")){
-            sendErrorToCMD(key,"lienReseau");
-            s="Link dead";
+            if (s.equals(" ")) {
+                sendErrorToCMD(key, "lienReseau");
+                s = "Link dead";
+            }else{
+                s = colorString(s);
+            }
         }
         return s;
     }
@@ -322,56 +343,127 @@ public class Fichier extends File {
     }
 
     public String getmessInsufisantePerm(){
-        String str = loadConfigurationConf().getConfigurationSection("Players").getString("messInsuffisantePerm");
-        str = colorString(str);
+        String str="";
+        String key="Players";
+        if (isSectionExist(key)) {
+            str = loadConfigurationConf().getConfigurationSection(key).getString("messInsuffisantePerm");
+            str = colorString(str);
+        }
         return str;
 
     }
 
     public String getMessageHover(String key, String subkey){
-        String str = loadConfigurationConf().getConfigurationSection(key).getString(subkey);
-
-        str=colorString(str);
-
-        return str;
-    }
-
-    public String getMessage(String key, String subkey){
         String str="";
-//TODO à continuer
+        if (isSectionExist(key)) {
+            str = loadConfigurationConf().getConfigurationSection(key).getString(subkey);
+            str = colorString(str);
+        }
         return str;
     }
+
+    public Messages getMessage(String key, String subkey){
+        Messages messages =null;
+        String str="";
+        if (isSectionExist(key)){
+            if (!(loadConfigurationConf().getConfigurationSection(key).getString(subkey).equals(" "))){
+                try {
+                    str=loadConfigurationConf().getConfigurationSection(key+"."+subkey).getString("messageReseau");
+                }catch (Exception e){
+                    str="";
+                }
+                messages=custom(str);
+
+
+            }else {
+                messages =new Messages("","","");
+            }
+        }
+        return messages;
+    }
+
+
+    private Messages custom(String s){
+        Messages messages =null;
+        String key="Players";
+        if (s.length()>0) {
+            if (isSectionExist(key)) {
+
+                char del1 = loadConfigurationConf().getConfigurationSection(key).getString("deletedCharFirst").charAt(0);
+                char del2 = loadConfigurationConf().getConfigurationSection(key).getString("deletedCharSecond").charAt(0);
+                if (del1 == ' ') {
+                    del1 = '[';
+                }
+                if (del2 == ' ') {
+                    del2 = ']';
+                }
+                if (s.contains(String.valueOf(del1)) && s.contains(String.valueOf(del2))){
+
+
+                    String s1 = s.split(String.valueOf(del1))[0];
+                    String s2 = s.substring(s.indexOf(del1), s.indexOf(del2));
+                    String s3 = s.split(String.valueOf(del2))[1];
+                    s3 = colorString(s3);
+                    s1 = colorString(s1);
+                    s2 = colorString(s2);
+                    messages = new Messages(s1, s2, s3);
+                }else {
+                    s=colorString(s);
+                    messages = new Messages(s,"","");
+                }
+
+
+
+
+
+
+
+            }
+        }else
+        {
+            messages= new Messages("","","");
+        }
+        return messages;
+    }
+
 
     private String colorString(String s){
         String ret="";
-        char fromConf= getHideChar();
-        for (int i=0;i<s.length();i++){
-            char c = s.charAt(i);
+        char fromConf=getHideChar();
+        if (s.contains(String.valueOf(fromConf))) {
+            for (int i = 0; i < s.length(); i++) {
+                char c = s.charAt(i);
 
-            if (c==fromConf){
-                char id= s.charAt(i+1);
-                ret+=ChatColor.getByChar(id);
-                i++;
-                i++;
-                try {
-                    c=s.charAt(i);
-                }catch (StringIndexOutOfBoundsException e){
-                    c=' ';
-                    e.printStackTrace();
+                if (c == fromConf) {
+                    char id = s.charAt(i + 1);
+                    ret += ChatColor.getByChar(id);
+                    i++;
+                    i++;
+                    try {
+                        c = s.charAt(i);
+                    } catch (StringIndexOutOfBoundsException e) {
+                        c = ' ';
+                        e.printStackTrace();
+                    }
+
                 }
-
+                ret += c;
             }
-            ret += c;
+        }else {
+            ret=s;
         }
         return ret;
     }
 
     private char getHideChar(){
         char ret =' ';
-        if (loadConfigurationConf().getConfigurationSection("Menu").getString("deletedChar").equals(" ")){
-            ret ='&';
-        }else {
-            ret = loadConfigurationConf().getConfigurationSection("Menu").getString("deletedChar").charAt(0);
+        String key="Menu";
+        if (isSectionExist(key)) {
+            if (loadConfigurationConf().getConfigurationSection(key).getString("deletedChar").equals(" ")) {
+                ret = '&';
+            } else {
+                ret = loadConfigurationConf().getConfigurationSection(key).getString("deletedChar").charAt(0);
+            }
         }
         return ret;
     }
@@ -401,12 +493,14 @@ public class Fichier extends File {
     private boolean configBool(String key, String subkey){
         boolean ret=false;
         try {
-            if (loadConfigurationConf().getConfigurationSection(key).getString(subkey).equals(" ")) {
-                ret = true;
-                sendErrorToCMD(key,subkey);
-                System.out.println("Veuillez verifier la syntaxe de"+subkey);
-            } else {
-                ret = loadConfigurationConf().getConfigurationSection(key).getBoolean(subkey);
+            if (isSectionExist(key)) {
+                if (loadConfigurationConf().getConfigurationSection(key).getString(subkey).equals(" ")) {
+                    ret = true;
+                    sendErrorToCMD(key, subkey);
+                    System.out.println("Veuillez verifier la syntaxe de" + subkey);
+                } else {
+                    ret = loadConfigurationConf().getConfigurationSection(key).getBoolean(subkey);
+                }
             }
         }catch (Exception e){
             e.printStackTrace();
@@ -414,8 +508,20 @@ public class Fichier extends File {
         return ret;
     }
 
+    private boolean isSectionExist(String key){
+        boolean ret = true;
+        if (loadConfigurationConf().getConfigurationSection(key) == null){
+            sendErrorToCMD(key);
+            ret = false;
+        }
+        return ret;
+    }
+
     private void sendErrorToCMD(String key, String subkey){
         System.out.println("Une erreur pour la configuration de "+key+"."+subkey);
+    }
+    private void sendErrorToCMD(String key){
+        System.out.println("Une erreur pour la configuration de "+key);
     }
 }
 
