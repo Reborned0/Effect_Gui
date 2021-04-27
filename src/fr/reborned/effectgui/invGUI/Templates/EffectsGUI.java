@@ -35,6 +35,7 @@ public class EffectsGUI extends InvGUI {
         this.init();
     }
 
+
     @Override
     public void init() {
         for (ItemStacked itemStacked: fichier.getItemStackMenuConf("ItemInMenu")) {
@@ -49,11 +50,21 @@ public class EffectsGUI extends InvGUI {
             this.fastInv.setItem(itemStacked.getSlotID(), itemStacked.getItemStack());
         }
 
+        if (this.fichier.getItemBorder() != null) {
+
+            for (Integer integer : this.fastInv.getBorders()) {
+                ItemStack itemStack = this.fichier.getItemBorder();
+                this.fastInv.setItem(integer, itemStack);
+            }
+        }
+
+
         this.fastInv.addClickHandler((unEvent) -> {
             if (unEvent.getAction().name().contains("HOTBAR")) {
                 unEvent.setCancelled(true);
             } else {
                 unEvent.setCancelled(true);
+                if (Arrays.stream(this.fastInv.getBorders()).noneMatch(value -> {return value == unEvent.getSlot();}))
                 if (!unEvent.getCurrentItem().getType().isTransparent()) {
 
                     Optional<EnumTools> optional = Arrays.stream(EnumTools.values()).filter((en) -> {

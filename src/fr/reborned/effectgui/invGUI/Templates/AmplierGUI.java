@@ -35,11 +35,7 @@ public class AmplierGUI extends InvGUI {
         this.fastInv = new FastInv(9*ligne, this.fichier.getTitleConf("AmplifierMenu","title"));
         this.itemStack=itemStack;
         this.diplayName=itemStack.getItemMeta().getDisplayName();
-        if (this.ligne%2==0){
-            this.compteur=(this.ligne*9)/2-8;
-        }else{
-            this.compteur=(this.ligne*9)/2 -3;
-        }
+        this.compteur=1;
         this.init();
     }
 
@@ -47,15 +43,15 @@ public class AmplierGUI extends InvGUI {
     @Override
     public void init() {
         for (int i=this.compteur;i<compteur+6;i++){
+            System.out.println(compteur);
             this.fastInv.setItem(i,setAttribute(this.itemStack,i));
         }
-        if (this.ligne%2==0){
-            ItemStack itemStack = new ItemStack(Material.BLAZE_ROD);
-            ItemMeta itemMeta = itemStack.getItemMeta();
-            itemMeta.setDisplayName("Go back");
-            itemStack.setItemMeta(itemMeta);
-            this.fastInv.setItem(this.ligne*9-1,itemStack);
-        }
+        ItemStack itemStack = new ItemStack(Material.BLAZE_ROD);
+        ItemMeta itemMeta = itemStack.getItemMeta();
+        itemMeta.setDisplayName("Go back");
+        itemStack.setItemMeta(itemMeta);
+        this.fastInv.setItem(this.ligne*9-1,itemStack);
+
 
         this.fastInv.addClickHandler(inventoryClickEvent -> {
             if (inventoryClickEvent.getAction().name().contains("HOTBAR")){
@@ -66,16 +62,16 @@ public class AmplierGUI extends InvGUI {
                         return ChatColor.stripColor(inventoryClickEvent.getCurrentItem().getItemMeta().getDisplayName()).split(" ")[0].equalsIgnoreCase(enumTools.getCommande());
                     }).findAny();
                     optional.ifPresent(enumTools -> {
-                      String str= inventoryClickEvent.getCurrentItem().getItemMeta().getDisplayName().split(" ")[1];
-                      int c = RomanNumber.toInt(str);
-                      try {
-                          this.player.addPotionEffect(new PotionEffect(PotionEffectType.getByName(enumTools.getCommande()),Integer.MAX_VALUE,c-1,true));
-                      }catch (Exception e){
-                          System.out.println("Effet non trouvé");
-                      }
+                        String str= inventoryClickEvent.getCurrentItem().getItemMeta().getDisplayName().split(" ")[1];
+                        int c = RomanNumber.toInt(str);
+                        try {
+                            this.player.addPotionEffect(new PotionEffect(PotionEffectType.getByName(enumTools.getCommande()),Integer.MAX_VALUE,c-1,true));
+                        }catch (Exception e){
+                            System.out.println("Effet non trouvé");
+                        }
 
-                      this.player.closeInventory();
-                      this.player.updateInventory();
+                        this.player.closeInventory();
+                        this.player.updateInventory();
                     });
                     if (inventoryClickEvent.getCurrentItem().getItemMeta().getDisplayName().equals("Go back")){
                         EffectsGUI effectsGUI = new EffectsGUI(this.player,this.fichier);
