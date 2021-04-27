@@ -12,6 +12,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
+import org.bukkit.event.inventory.InventoryAction;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -53,8 +55,23 @@ public class PListerner implements Listener {
                 effectsGUI.openInv();
             }
         }
-
+        e.setCancelled(true);
     }
+
+    @EventHandler
+    public void onInterractInventory(InventoryClickEvent e){
+        Player player = (Player) e.getWhoClicked();
+        ItemStack itemStack = e.getCurrentItem();
+
+        if (itemStack != null){
+            if (e.isRightClick() && itemStack.equals(fichier.getItemHotbar())){
+                EffectsGUI effectsGUI = new EffectsGUI(player,fichier);
+                effectsGUI.openInv();
+            }
+        }
+        e.setCancelled(true);
+    }
+
     @EventHandler
     public void onFoodLevelChange(FoodLevelChangeEvent e){
         e.setCancelled(fichier.getfoodLevelChangeConf());

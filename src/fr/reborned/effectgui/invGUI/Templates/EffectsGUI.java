@@ -50,10 +50,10 @@ public class EffectsGUI extends InvGUI {
             this.fastInv.setItem(itemStacked.getSlotID(), itemStacked.getItemStack());
         }
 
-        if (this.fichier.getItemBorder() != null) {
+        if (this.fichier.getItem("Menu.Item") != null) {
 
             for (Integer integer : this.fastInv.getBorders()) {
-                ItemStack itemStack = this.fichier.getItemBorder();
+                ItemStack itemStack = this.fichier.getItem("Menu.Item");
                 this.fastInv.setItem(integer, itemStack);
             }
         }

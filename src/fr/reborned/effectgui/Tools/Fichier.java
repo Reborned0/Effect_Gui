@@ -119,6 +119,14 @@ public class Fichier extends File {
         config.set(key+"nblignes"," ");
         config.set(key+"title"," ");
 
+        key="AmplifierMenu.Item";
+        config.set(key+"name", "");
+        config.set(key+"type"," ");
+        config.set(key+"lore"," ");
+        config.set(key+"itemFlags"," ");
+        config.set(key+"enchantement"," ");
+        config.set(key+"amplifier"," ");
+
         key= "Location.";
         config.set(key+"world", Bukkit.getServer().getWorlds().get(0).getName());
 
@@ -178,9 +186,8 @@ public class Fichier extends File {
         return ret;
     }
 
-    public ItemStack getItemBorder(){
+    public ItemStack getItem(String key){
         ItemStack itemStack = null;
-        String key ="Menu.Item";
         if (isSectionExist(key)){
             Material material =Material.getMaterial(loadConfigurationConf().getConfigurationSection(key).getString("type").toUpperCase());
             if (material==null){

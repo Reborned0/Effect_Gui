@@ -1,13 +1,11 @@
 package fr.reborned.effectgui.invGUI.Templates;
 
-import fr.reborned.effectgui.Main;
 import fr.reborned.effectgui.Tools.EnumTools;
 import fr.reborned.effectgui.Tools.FastInv;
 import fr.reborned.effectgui.Tools.Fichier;
 import fr.reborned.effectgui.Tools.RomanNumber;
 import fr.reborned.effectgui.invGUI.InvGUI;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -15,7 +13,6 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Optional;
 
 public class AmplierGUI extends InvGUI {
@@ -42,15 +39,12 @@ public class AmplierGUI extends InvGUI {
 
     @Override
     public void init() {
-        for (int i=this.compteur;i<compteur+6;i++){
-            System.out.println(compteur);
-            this.fastInv.setItem(i,setAttribute(this.itemStack,i));
+        for (int i=this.compteur;i<compteur+5;i++){
+            this.fastInv.setItem(i+10,setAttribute(this.itemStack,i));
         }
-        ItemStack itemStack = new ItemStack(Material.BLAZE_ROD);
-        ItemMeta itemMeta = itemStack.getItemMeta();
-        itemMeta.setDisplayName("Go back");
-        itemStack.setItemMeta(itemMeta);
-        this.fastInv.setItem(this.ligne*9-1,itemStack);
+        if (this.fichier.getItem("AmplifierMenu.Item")!=null) {
+            this.fastInv.setItem(this.ligne * 9 - 5, this.fichier.getItem("AmplifierMenu.Item"));
+        }
 
 
         this.fastInv.addClickHandler(inventoryClickEvent -> {
@@ -58,6 +52,11 @@ public class AmplierGUI extends InvGUI {
                 inventoryClickEvent.setCancelled(true);
             }else{
                 if (!inventoryClickEvent.getCurrentItem().getType().isTransparent()){
+                    if (inventoryClickEvent.getCurrentItem().isSimilar(this.fichier.getItem("AmplifierMenu.Item"))){
+                        EffectsGUI effectsGUI = new EffectsGUI(this.player,this.fichier);
+                        effectsGUI.openInv();
+                        return;
+                    }
                     Optional<EnumTools> optional = Arrays.stream(EnumTools.values()).filter(enumTools -> {
                         return ChatColor.stripColor(inventoryClickEvent.getCurrentItem().getItemMeta().getDisplayName()).split(" ")[0].equalsIgnoreCase(enumTools.getCommande());
                     }).findAny();
@@ -73,10 +72,6 @@ public class AmplierGUI extends InvGUI {
                         this.player.closeInventory();
                         this.player.updateInventory();
                     });
-                    if (inventoryClickEvent.getCurrentItem().getItemMeta().getDisplayName().equals("Go back")){
-                        EffectsGUI effectsGUI = new EffectsGUI(this.player,this.fichier);
-                        effectsGUI.openInv();
-                    }
                 }
             }
         });
