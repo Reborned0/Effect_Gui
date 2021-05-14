@@ -18,6 +18,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Optional;
 
 public class EffectsGUI extends InvGUI {
@@ -74,19 +75,8 @@ public class EffectsGUI extends InvGUI {
                         if (PotionEffectType.getByName(c.getCommande().toUpperCase()) != null) {
 
                             AmplierGUI amplierGUI = new AmplierGUI(this.player, itemUniqueWithName(unEvent.getCurrentItem()),this.fichier);
-                            if (this.player.hasPotionEffect(PotionEffectType.getByName(c.getCommande().toUpperCase()))) {
-                                try {
-                                    for (PotionEffect potionEffect : this.player.getActivePotionEffects()) {
-                                        if (potionEffect.getType().equals(PotionEffectType.getByName((c.getCommande()).toUpperCase()))) {
-                                            this.player.removePotionEffect(potionEffect.getType());
-                                        }
-                                    }
 
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-
-                            } else if (!this.player.hasPotionEffect(PotionEffectType.getByName(c.getCommande().toUpperCase()))) {
+                            if (PotionEffectType.getByName(c.getCommande().toUpperCase())!= null){
                                 amplierGUI.openInv();
                                 return;
                             }

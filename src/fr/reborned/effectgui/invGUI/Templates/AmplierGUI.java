@@ -39,7 +39,11 @@ public class AmplierGUI extends InvGUI {
 
     @Override
     public void init() {
+        int amplifier = this.player.getPotionEffect(PotionEffectType.getByName(this.itemStack.getItemMeta().getDisplayName().toUpperCase())).getAmplifier();
         for (int i=this.compteur;i<compteur+5;i++){
+            if (i==amplifier){
+               //ajouter enchantement
+            }
             this.fastInv.setItem(i+10,setAttribute(this.itemStack,i));
         }
         if (this.fichier.getItem("AmplifierMenu.Item")!=null) {
@@ -63,11 +67,32 @@ public class AmplierGUI extends InvGUI {
                     optional.ifPresent(enumTools -> {
                         String str= inventoryClickEvent.getCurrentItem().getItemMeta().getDisplayName().split(" ")[1];
                         int c = RomanNumber.toInt(str);
-                        try {
-                            this.player.addPotionEffect(new PotionEffect(PotionEffectType.getByName(enumTools.getCommande()),Integer.MAX_VALUE,c-1,true));
-                        }catch (Exception e){
-                            System.out.println("Effet non trouvé");
+
+                        if (this.player.hasPotionEffect(PotionEffectType.getByName(enumTools.getCommande().toUpperCase()))){
+                            for (PotionEffect potionEffect : this.player.getActivePotionEffects()){
+                                if (this.player.hasPotionEffect(PotionEffectType.getByName(enumTools.getCommande().toUpperCase()))){
+                                    if (potionEffect.getAmplifier() == c-1){
+                                        this.player.removePotionEffect(potionEffect.getType());
+                                    }else {
+                                        try {
+                                            this.player.removePotionEffect(potionEffect.getType());
+                                            this.player.addPotionEffect(new PotionEffect(PotionEffectType.getByName(enumTools.getCommande()),Integer.MAX_VALUE,c-1,true));
+                                        }catch (Exception e){
+                                            System.out.println("Effet non trouvé");
+                                        }
+                                    }
+                                }
+                            }
+                        }else {
+                            try {
+                                this.player.addPotionEffect(new PotionEffect(PotionEffectType.getByName(enumTools.getCommande()),Integer.MAX_VALUE,c-1,true));
+                            }catch (Exception e){
+                                System.out.println("Effet non trouvé");
+                            }
                         }
+
+
+
 
                         this.player.closeInventory();
                         this.player.updateInventory();
