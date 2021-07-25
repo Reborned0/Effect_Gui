@@ -1,6 +1,5 @@
 package fr.reborned.effectgui.invGUI.Templates;
 
-import fr.reborned.effectgui.Main;
 import fr.reborned.effectgui.Tools.*;
 import fr.reborned.effectgui.invGUI.InvGUI;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -40,9 +39,11 @@ public class EffectsGUI extends InvGUI {
     @Override
     public void init() {
         for (ItemStacked itemStacked: fichier.getItemStackMenuConf("ItemInMenu")) {
-            for (PotionEffect potionEffect : this.player.getActivePotionEffects()){
-                if (potionEffect.getType().getName().toLowerCase().contains(ChatColor.stripColor(itemStacked.getItemStack().getItemMeta().getDisplayName().toLowerCase()))){
-                    enchantItemInventory(itemStacked);
+            if (!this.player.getActivePotionEffects().isEmpty()) {
+                for (PotionEffect potionEffect : this.player.getActivePotionEffects()) {
+                    if (potionEffect.getType().getName().toLowerCase().contains(ChatColor.stripColor(itemStacked.getItemStack().getItemMeta().getDisplayName().toLowerCase()))) {
+                        enchantItemInventory(itemStacked);
+                    }
                 }
             }
             if (this.player.getAllowFlight() && ChatColor.stripColor(itemStacked.getItemStack().getItemMeta().getDisplayName().toUpperCase()).contains(EnumTools.FLY.getCommande())){
@@ -99,20 +100,15 @@ public class EffectsGUI extends InvGUI {
                                     msgBefore.addExtra(msgAfter);
 
                                     this.player.spigot().sendMessage(msgBefore);
-
                                 }
                             }
                             else{
                                 this.player.sendMessage(ChatColor.RED+"Vous n'avez pas les permissions suffisantes");
                             }
                         }else {
-
-
                             if (c.getCommande().equalsIgnoreCase(ChatColor.stripColor(unEvent.getCurrentItem().getItemMeta().getDisplayName()))) {
-
                                 if (unEvent.getCurrentItem().getType().equals(Material.SKULL_ITEM)){
                                     String name = unEvent.getCurrentItem().getItemMeta().getDisplayName();
-
                                     Messages messages = this.fichier.getMessage("ItemInMenu",c.getCommande());
 
                                     if (messages.getBeforeMessage().length()>0) {
@@ -122,7 +118,7 @@ public class EffectsGUI extends InvGUI {
                                             TextComponent msgHover = new TextComponent(messages.getHoverMessage());
                                             msgHover.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, this.fichier.getLinkSocialNetwork("ItemInMenu." + c.getCommande())));
                                             String hovered =this.fichier.getMessageHover("ItemInMenu." + c.getCommande(),"messageHover");
-                                            if (hovered.equals("")) {
+                                            if (!hovered.equals("")) {
                                                 msgHover.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(hovered).create()));
                                             }
                                             msgBefore.addExtra(msgHover);

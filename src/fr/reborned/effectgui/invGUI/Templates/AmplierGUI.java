@@ -1,12 +1,11 @@
 package fr.reborned.effectgui.invGUI.Templates;
 
-import fr.reborned.effectgui.Tools.EnumTools;
-import fr.reborned.effectgui.Tools.FastInv;
-import fr.reborned.effectgui.Tools.Fichier;
-import fr.reborned.effectgui.Tools.RomanNumber;
+import fr.reborned.effectgui.Tools.*;
 import fr.reborned.effectgui.invGUI.InvGUI;
 import org.bukkit.ChatColor;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
@@ -31,25 +30,29 @@ public class AmplierGUI extends InvGUI {
         this.ligne = this.fichier.getLigneConf("AmplifierMenu","nblignes");
         this.fastInv = new FastInv(9*ligne, this.fichier.getTitleConf("AmplifierMenu","title"));
         this.itemStack=itemStack;
-        this.diplayName=itemStack.getItemMeta().getDisplayName();
+        this.diplayName=itemStack.getItemMeta().getDisplayName().substring(2);
         this.compteur=1;
         this.init();
     }
 
-
     @Override
     public void init() {
-        int amplifier = this.player.getPotionEffect(PotionEffectType.getByName(this.itemStack.getItemMeta().getDisplayName().toUpperCase())).getAmplifier();
-        for (int i=this.compteur;i<compteur+5;i++){
-            if (i==amplifier){
-               //ajouter enchantement
-            }
-            this.fastInv.setItem(i+10,setAttribute(this.itemStack,i));
+        int amplifier = 0;
+        if (this.player.hasPotionEffect(PotionEffectType.getByName(diplayName))) {
+            amplifier = this.player.getPotionEffect(PotionEffectType.getByName(diplayName)).getAmplifier() + 1;
         }
+            for (int i = this.compteur; i < compteur + 5; i++) {
+                if (i == amplifier) {
+                    this.fastInv.setItem(i + 10, setAttribute(enchantItemInventory(this.itemStack), i)); //enchanté
+                    removeEnchant(this.itemStack);
+                }else{
+                    this.fastInv.setItem(i + 10, setAttribute(this.itemStack, i));
+                }
+            }
+
         if (this.fichier.getItem("AmplifierMenu.Item")!=null) {
             this.fastInv.setItem(this.ligne * 9 - 5, this.fichier.getItem("AmplifierMenu.Item"));
         }
-
 
         this.fastInv.addClickHandler(inventoryClickEvent -> {
             if (inventoryClickEvent.getAction().name().contains("HOTBAR")){
@@ -70,7 +73,7 @@ public class AmplierGUI extends InvGUI {
 
                         if (this.player.hasPotionEffect(PotionEffectType.getByName(enumTools.getCommande().toUpperCase()))){
                             for (PotionEffect potionEffect : this.player.getActivePotionEffects()){
-                                if (this.player.hasPotionEffect(PotionEffectType.getByName(enumTools.getCommande().toUpperCase()))){
+                                if (this.player.hasPotionEffect(PotionEffectType.getByName(diplayName)) && PotionEffectType.getByName(diplayName).equals(potionEffect.getType())){
                                     if (potionEffect.getAmplifier() == c-1){
                                         this.player.removePotionEffect(potionEffect.getType());
                                     }else {
@@ -90,10 +93,6 @@ public class AmplierGUI extends InvGUI {
                                 System.out.println("Effet non trouvé");
                             }
                         }
-
-
-
-
                         this.player.closeInventory();
                         this.player.updateInventory();
                     });
@@ -121,5 +120,18 @@ public class AmplierGUI extends InvGUI {
     @Override
     public FastInv getFastInventory() {
         return fastInv;
+    }
+    private ItemStack enchantItemInventory(ItemStack itemStack){
+        ItemMeta itemMeta =itemStack.getItemMeta();
+        itemMeta.addEnchant(Enchantment.PROTECTION_ENVIRONMENTAL,4,true);
+        itemMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        itemStack.setItemMeta(itemMeta);
+        return itemStack;
+    }
+    private ItemStack removeEnchant (ItemStack itemStack){
+        ItemMeta itemMeta =itemStack.getItemMeta();
+        itemMeta.removeEnchant(Enchantment.PROTECTION_ENVIRONMENTAL);
+        itemStack.setItemMeta(itemMeta);
+        return itemStack;
     }
 }
