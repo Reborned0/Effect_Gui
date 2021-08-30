@@ -54,8 +54,9 @@ public class PListerner implements Listener {
                 EffectsGUI effectsGUI = new EffectsGUI(player,fichier);
                 effectsGUI.openInv();
             }
+            e.setCancelled(true);
         }
-        e.setCancelled(true);
+
     }
 
     @EventHandler

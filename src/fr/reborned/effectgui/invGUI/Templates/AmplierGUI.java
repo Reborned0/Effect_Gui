@@ -43,10 +43,10 @@ public class AmplierGUI extends InvGUI {
         }
             for (int i = this.compteur; i < compteur + 5; i++) {
                 if (i == amplifier) {
-                    this.fastInv.setItem(i + 10, setAttribute(enchantItemInventory(this.itemStack), i)); //enchanté
+                    this.fastInv.setItem(i + 10, setAttribute(enchantItemInventory(this.itemStack), i,true)); //enchanté
                     removeEnchant(this.itemStack);
                 }else{
-                    this.fastInv.setItem(i + 10, setAttribute(this.itemStack, i));
+                    this.fastInv.setItem(i + 10, setAttribute(this.itemStack, i,false));
                 }
             }
 
@@ -76,6 +76,7 @@ public class AmplierGUI extends InvGUI {
                                 if (this.player.hasPotionEffect(PotionEffectType.getByName(diplayName)) && PotionEffectType.getByName(diplayName).equals(potionEffect.getType())){
                                     if (potionEffect.getAmplifier() == c-1){
                                         this.player.removePotionEffect(potionEffect.getType());
+
                                     }else {
                                         try {
                                             this.player.removePotionEffect(potionEffect.getType());
@@ -102,10 +103,27 @@ public class AmplierGUI extends InvGUI {
     }
     private ItemStack setAttribute(ItemStack itemStack, int i){
         ItemMeta itemMeta = itemStack.getItemMeta();
-        itemMeta.setDisplayName(this.diplayName+" "+ RomanNumber.toRoman(i));
+        itemMeta.setDisplayName(ChatColor.RESET+""+ this.diplayName+" "+ RomanNumber.toRoman(i));
         itemStack.setItemMeta(itemMeta);
         return itemStack;
     }
+
+    private ItemStack setAttribute(ItemStack itemStack, int i, boolean b){
+        if (b){
+            ItemMeta itemMeta = itemStack.getItemMeta();
+            itemMeta.setDisplayName(ChatColor.RESET+""+ ChatColor.GOLD+ this.diplayName+" "+ RomanNumber.toRoman(i));
+            itemStack.setItemMeta(itemMeta);
+            return itemStack;
+        }else {
+            ItemMeta itemMeta = itemStack.getItemMeta();
+            itemMeta.setDisplayName(ChatColor.RESET+""+ this.diplayName+" "+ RomanNumber.toRoman(i));
+            itemStack.setItemMeta(itemMeta);
+            return itemStack;
+
+        }
+    }
+
+
 
     @Override
     public void openInv() {

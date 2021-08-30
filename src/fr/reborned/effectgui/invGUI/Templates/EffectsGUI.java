@@ -146,12 +146,18 @@ public class EffectsGUI extends InvGUI {
                                         if (this.player.getAllowFlight()){
                                             this.player.setAllowFlight(false);
                                         }
+                                        this.player.sendMessage(this.fichier.getActivDesactivMessage("Players","messDesacAll"));
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                     }
                                 }
                                 if (ChatColor.stripColor(unEvent.getCurrentItem().getItemMeta().getDisplayName()).equalsIgnoreCase(EnumTools.FLY.getName()) && this.player.hasPermission(EnumTools.FLY.getPermission())){
                                     this.player.setAllowFlight(!this.player.getAllowFlight());
+                                    if (this.player.getAllowFlight()) {
+                                        this.player.sendMessage( addEffectIntoMessage(this.fichier.getActivDesactivMessage("Players","messActivation"),"Fly"));
+                                    } else {
+                                        this.player.sendMessage( addEffectIntoMessage(this.fichier.getActivDesactivMessage("Players","messDesactivation"),"Fly"));
+                                    }
                                 }else if (ChatColor.stripColor(unEvent.getCurrentItem().getItemMeta().getDisplayName()).equalsIgnoreCase(EnumTools.FLY.getName()) && !this.player.hasPermission(EnumTools.FLY.getPermission())){
                                     Messages messages = this.fichier.getmessInsufisantePerm();
 
@@ -207,6 +213,21 @@ public class EffectsGUI extends InvGUI {
         itemMeta.addEnchant(Enchantment.PROTECTION_ENVIRONMENTAL,4,true);
         itemMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         itemStacked.getItemStack().setItemMeta(itemMeta);
+    }
+
+    private String addEffectIntoMessage(String decompose,String effect){
+        String str ="";
+        if (decompose.length()>0){
+            try {
+                String[] substr = decompose.split("%");
+                effect = ChatColor.RED + effect;
+                str+= substr[0]+ effect +substr[1];
+            }catch (NullPointerException e){
+                str = decompose;
+                e.printStackTrace();
+            }
+        }
+        return str;
     }
 
 }

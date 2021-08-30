@@ -85,7 +85,7 @@ public class Fichier extends File {
             config.set(key+"amplifier"," ");
             config.set(key+"slotID"," ");
             if (S.getType().equalsIgnoreCase("RESEAU")){
-                config.set(key+"URL"," ");
+                config.set(key+"URL","https://minecraft-heads.com/  //remplacer par 'Minecraft-URL' ");
                 config.set(key+"messageReseau"," ");
                 config.set(key+"lienReseau"," ");
                 config.set(key+"messageHover"," ");
@@ -140,6 +140,9 @@ public class Fichier extends File {
         config.set(key+"messInsuffisantePerm", "Redirection vers la [Boutique]");
         config.set(key+"messInsuffisantePermLien", "https://nitrocube.buycraft.net/");
         config.set(key+"messInsuffisantePermHover", "");
+        config.set(key+"messActivation", "L'effet % a été activé");
+        config.set(key+"messDesactivation", "L'effet % a été désactivé");
+        config.set(key+"messDesacAll", "Tous les effets ont été désactivés");
         config.set(key+"dropItems", false);
         saveConfig(config);
     }
@@ -428,6 +431,15 @@ public class Fichier extends File {
         return messages;
     }
 
+    public String getActivDesactivMessage(String key, String subkey){
+        String str="";
+        if (isSectionExist(key)){
+            str= loadConfigurationConf().getConfigurationSection(key).getString(subkey);
+            colorString(str);
+        }
+        return str;
+    }
+
     private Messages custom(String s){
         Messages messages =null;
         String key="Players";
@@ -558,6 +570,7 @@ public class Fichier extends File {
         }
         return ret;
     }
+
 
     private boolean isSectionExist(String key){
         boolean ret = true;
